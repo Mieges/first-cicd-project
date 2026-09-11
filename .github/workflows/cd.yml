@@ -1,0 +1,11 @@
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  tag-trigger-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - run: echo "Es wurde ein Tag erkannt"
