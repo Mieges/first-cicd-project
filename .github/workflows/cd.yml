@@ -1,11 +1,23 @@
 on:
-  push:
-    tags:
-      - '*'
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
 
 jobs:
-  tag-trigger-test:
+  erfolgreich:
     runs-on: ubuntu-latest
 
+    if: ${{ github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.head_branch, 'v') }}
+
     steps:
-      - run: echo "Es wurde ein Tag erkannt"
+      - name: Gebautes Artefact herunterladen
+        uses: actions/download-artifact@v8
+        with:
+          name: gebautes-jar
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+permissions:
+  actions: read
