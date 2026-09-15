@@ -18,6 +18,8 @@ jobs:
           name: gebautes-jar
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verzeichnis ansehen
+        run: ls -l
 
 permissions:
   actions: read
