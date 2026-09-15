@@ -16,10 +16,14 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: gebautes-jar
+          path: artifact
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Verzeichnis ansehen
-        run: ls -l
+      - name: Release erstellen
+        run: gh release create ${{ github.event.workflow_run.head_branch }} artifact/*.jar --generate-notes --verify-tag --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 permissions:
   actions: read
+  contents: write
