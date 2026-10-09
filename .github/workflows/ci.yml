@@ -27,3 +27,6 @@ jobs:
         with:
           name: gebautes-jar
           path: target/*.jar
+
+      - name: Dockerimage bauen
+        run: docker build -t cicd-app:ci .
