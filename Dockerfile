@@ -1,3 +1,4 @@
 FROM azul-zulu:25
-COPY target/cicd-test-app-0.0.2.jar /app.jar
+LABEL org.opencontainers.image.source="https://github.com/Mieges/first-cicd-project"
+COPY target/*.jar /app.jar
 CMD ["java", "-jar", "/app.jar"]
