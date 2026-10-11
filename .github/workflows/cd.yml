@@ -12,18 +12,40 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.head_branch, 'v') }}
 
     steps:
+      - name: Repo auschecken
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
       - name: Gebautes Artefact herunterladen
         uses: actions/download-artifact@v8
         with:
           name: gebautes-jar
-          path: artifact
+          path: target
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Image bauen
+        run: docker build -t ghcr.io/mieges/cicd-app:${{ github.event.workflow_run.head_branch }} .
+      - name: Bei GHCR anmelden damit gepusht werden kann
+        uses: docker/login-action@v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Image auf Container Registry pushen
+        run: docker push ghcr.io/mieges/cicd-app:${{ github.event.workflow_run.head_branch }}
       - name: Release erstellen
-        run: gh release create ${{ github.event.workflow_run.head_branch }} artifact/*.jar --generate-notes --verify-tag --repo ${{ github.repository }}
+        run: |
+          gh release create "$RELEASE_TAG" target/*.jar \
+            --generate-notes \
+            --notes "Container-Image: ghcr.io/mieges/cicd-app:$RELEASE_TAG — [Container-Paket ansehen](https://github.com/users/Mieges/packages/container/package/cicd-app)" \
+            --verify-tag \
+            --repo "${{ github.repository }}"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ github.event.workflow_run.head_branch }}
+
 
 permissions:
   actions: read
   contents: write
+  packages: write
